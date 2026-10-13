@@ -32,7 +32,8 @@ jobs:
         run: make all
 
       - name: Run Unity Unit Tests via Wine
-        run: make test
+        run: |
+          WINEDEBUG=-all wine64 build/test_runner.exe || WINEDEBUG=-all wine build/test_runner.exe
 
       - name: Build Doxygen Documentation
         run: make doc
