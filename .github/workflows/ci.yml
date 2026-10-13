@@ -16,24 +16,29 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install MinGW, Wine and Doxygen
+      - name: Install Dependencies
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             gcc-mingw-w64-x86-64 \
             binutils-mingw-w64-x86-64 \
+            mingw-w64-tools \
             wine64 \
+            wine \
             make \
             doxygen \
             graphviz
+
+      - name: Initialize Wine Environment
+        run: |
+          WINEDEBUG=-all wineboot --init || true
 
       - name: Build Application Binary
         run: make all
 
       - name: Run Unity Unit Tests via Wine
-        run: |
-          WINEDEBUG=-all wine64 build/test_runner.exe || WINEDEBUG=-all wine build/test_runner.exe
+        run: make test
 
       - name: Build Doxygen Documentation
         run: make doc
