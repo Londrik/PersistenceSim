@@ -1,0 +1,11 @@
+PROJECT_NAME           = "PersistenceSim"
+PROJECT_BRIEF          = "Win32 C Persistence Simulator & QA Suite"
+OUTPUT_DIRECTORY       = build/doc
+INPUT                  = src src/include
+RECURSIVE              = YES
+FILE_PATTERNS          = *.c *.h
+GENERATE_LATEX         = NO
+GENERATE_HTML          = YES
+EXTRACT_ALL            = YES
+OPTIMIZE_OUTPUT_FOR_C  = YES
+QUIET                  = YES

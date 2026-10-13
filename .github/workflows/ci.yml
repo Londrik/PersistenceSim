@@ -1,0 +1,44 @@
+name: CI - MinGW Build & Unity Tests
+
+on:
+  push:
+    branches: [ main, "feat/**" ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install MinGW, Wine and Doxygen
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            gcc-mingw-w64-x86-64 \
+            binutils-mingw-w64-x86-64 \
+            wine64 \
+            make \
+            doxygen \
+            graphviz
+
+      - name: Build Application Binary
+        run: make all
+
+      - name: Run Unity Unit Tests via Wine
+        run: make test
+
+      - name: Build Doxygen Documentation
+        run: make doc
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: PersistenceSim-win64-bin
+          path: build/PersistenceSim.exe
