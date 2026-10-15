@@ -1,37 +1,33 @@
 #include <stdio.h>
-#include <windows.h>
 #include "persistence.h"
 
-int wmain(int argc, wchar_t *argv[]) {
-    (void)argc;
-    (void)argv;
+int wmain(void) {
+    wchar_t current_exe[MAX_PATH];
+    DWORD path_status = GetCurrentBinaryPath(current_exe, MAX_PATH);
 
-    const wchar_t *app_name = L"PersistenceSimApp";
-    wchar_t current_path[MAX_PATH];
-
-    DWORD length = GetModuleFileNameW(NULL, current_path, MAX_PATH);
-    if (length == 0 || length >= MAX_PATH) {
-        wprintf(L"[-] Falha ao obter caminho do modulo: %lu\n", GetLastError());
+    if (path_status != ERROR_SUCCESS) {
+        wprintf(L"[-] Falha ao obter caminho do binario: erro 0x%08lX\n", path_status);
         return 1;
     }
 
-    wprintf(L"[*] Simulando persistencia HKCU Run para: %ls\n", current_path);
+    wprintf(L"[+] Binario localizado: %ls\n", current_exe);
 
-    LSTATUS status = SetStartupPersistence(app_name, current_path);
-    if (status == ERROR_SUCCESS) {
-        wprintf(L"[+] Chave de persistencia criada com sucesso.\n");
-    } else {
-        wprintf(L"[-] Falha ao criar chave: %ld\n", status);
-        return (int)status;
+    const wchar_t *entry_name = L"PersistenceSimulatorApp";
+    LSTATUS status = SetUserRunPersistence(entry_name, current_exe);
+
+    if (status != ERROR_SUCCESS) {
+        wprintf(L"[-] Falha ao configurar persistencia: erro 0x%08lX\n", status);
+        return 1;
     }
 
-    status = RemoveStartupPersistence(app_name);
-    if (status == ERROR_SUCCESS) {
-        wprintf(L"[+] Chave removida com sucesso (Cleanup).\n");
-    } else {
-        wprintf(L"[-] Falha no cleanup da chave: %ld\n", status);
-        return (int)status;
+    wprintf(L"[+] Persistencia configurada com sucesso em HKCU Run.\n");
+
+    LSTATUS cleanup_status = RemoveStartupPersistence(entry_name);
+    if (cleanup_status != ERROR_SUCCESS) {
+        wprintf(L"[-] Falha ao remover entrada de persistencia: erro 0x%08lX\n", cleanup_status);
+        return (int)cleanup_status;
     }
 
+    wprintf(L"[+] Limpeza executada com sucesso.\n");
     return 0;
 }
